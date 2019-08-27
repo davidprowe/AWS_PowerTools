@@ -1,0 +1,76 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Provides Summit Route with the ability to perform a security assessment on this account.  An IAM role is created to provide view-only access of the metadata in the account.'
+Resources:
+  CFNSummitRouteRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: arn:aws:iam::393727464233:root
+            Action: 'sts:AssumeRole'
+            Condition:
+              Bool:
+                'aws:MultiFactorAuthPresent': true
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/SecurityAudit'
+        - 'arn:aws:iam::aws:policy/job-function/ViewOnlyAccess'
+      RoleName: SummitRouteAudit
+      Policies: 
+        - PolicyName: SummitRouteAdditionalViewPrivileges
+          PolicyDocument:
+            Version : '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action:
+                - 'acm:DescribeCertificate'
+                - 'eks:DescribeCluster'
+                - 'eks:ListClusters'
+                - 'elasticfilesystem:DescribeMountTargetSecurityGroups'
+                - 'elasticfilesystem:DescribeMountTargets'
+                - 'elasticmapreduce:DescribeCluster'
+                - 'elasticmapreduce:DescribeSecurityConfiguration'
+                - 'events:DescribeRule'
+                - 'fms:ListComplianceStatus'
+                - 'fms:ListPolicies'
+                - 'guardduty:ListDetectors'
+                - 'guardduty:ListFindings'
+                - 'guardduty:ListIPSets'
+                - 'guardduty:ListInvitations'
+                - 'guardduty:ListMembers'
+                - 'guardduty:ListThreatIntelSets'
+                - 'iam:GenerateServiceLastAccessedDetails'
+                - 'inspector:DescribeAssessmentRuns'
+                - 'inspector:DescribeAssessmentTargets'
+                - 'inspector:DescribeAssessmentTemplates'
+                - 'inspector:DescribeCrossAccountAccessRole'
+                - 'inspector:DescribeFindings'
+                - 'inspector:DescribeResourceGroups'
+                - 'inspector:DescribeRulesPackages'
+                - 'iot:DescribeAuthorizer'
+                - 'iot:DescribeCACertificate'
+                - 'iot:DescribeCertificate'
+                - 'iot:DescribeDefaultAuthorizer'
+                - 'iot:GetPolicy'
+                - 'iot:GetPolicyVersion'
+                - 'lambda:GetFunctionConfiguration'
+                - 'lightsail:GetInstances'
+                - 'lightsail:GetLoadBalancers'
+                - 'opsworks:DescribeStacks'
+                - 'organizations:Describe*'
+                - 'organizations:List*'
+                - 'shield:DescribeAttack'
+                - 'shield:DescribeProtection'
+                - 'shield:DescribeSubscription'
+                - 'sso:DescribePermissionsPolicies'
+                - 'sso:ListApplicationInstanceCertificates'
+                - 'sso:ListApplicationInstances'
+                - 'sso:ListApplicationTemplates'
+                - 'sso:ListApplications'
+                - 'sso:ListDirectoryAssociations'
+                - 'sso:ListPermissionSets'
+                - 'sso:ListProfileAssociations'
+                - 'sso:ListProfiles'
+              Resource: '*'
