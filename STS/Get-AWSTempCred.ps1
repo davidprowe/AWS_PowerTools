@@ -41,15 +41,16 @@ Function Get-Choice {
     } 
 }
 
-Function Get-AWSTempCred {
+Function Get-STSSAMLCred {
 [CmdletBinding()]
+[alias("Get-AWSTempCred")]
     param (
         [string]$ADFSHost='adfs.domain.com', ##Change for environment-appropriate default if desired
         [string]$RelyingParty = 'urn:amazon:webservices',
-        [pscredential]$Credential #$creds = get-credential 
+        [switch]$SetHost,
+        [pscredential]$Credential
     )
-
-    $WebRequestParams=@{ #Initialize parameters object
+     $WebRequestParams=@{ #Initialize parameters object
         Uri = "https://$ADFSHost/adfs/ls/IdpInitiatedSignon.aspx?LoginToRP=$RelyingParty"
         Method = 'POST'
         ContentType = 'application/x-www-form-urlencoded'
@@ -59,7 +60,7 @@ Function Get-AWSTempCred {
     if ($Credential) {
         $WebRequestParams.Add('Body',@{UserName=$Credential.UserName;Password=$Credential.GetNetworkCredential().Password})
     } else {
-        $Credential = Get-Credential -Message "Enter the domain credentials for the endpoint"
+        $Credential = Get-Credential -Message "Enter the domain credentials for the SAML Provider"
         $WebRequestParams.Add('Body',@{UserName=$Credential.UserName;Password=$Credential.GetNetworkCredential().Password})
     }
 
@@ -106,13 +107,22 @@ Function Get-AWSTempCred {
     #Write-Host "New access key: $($AssumedRole.Credentials.AccessKeyId), expires $($AssumedRole.Credentials.Expiration)"
     #Write-Host "Setting as default AWSCredential for future AWSPowershell usage, by exporting to `$Global:StoredAWSCredentials"
     #write-host ""
-    #Commented out printing of sensitive information:
+   
+
+    if ($SetHost){
+    Write-Host "Setting as default AWSCredential for future AWSPowershell usage, by exporting to `$Global:StoredAWSCredentials"
+    Set-AWSCredential -AccessKey $AssumedRole.Credentials.AccessKeyId -SecretKey $AssumedRole.Credentials.SecretAccessKey -SessionToken $AssumedRole.Credentials.SessionToken
+    $Global:StoredAWSCredentials = $StoredAWSCredentials
+    }
+    else{
+     #Commented out printing of sensitive information:
     #Sensitive information - i want this because I'm using this for aws-vault and cloudmapper
     Write-host "AccessKey=$($AssumedRole.Credentials.AccessKeyId)"
     write-host ""
     Write-host "SecretKey=$($AssumedRole.Credentials.SecretAccessKey)"
     write-host ""
     Write-host "SessionToken=$($AssumedRole.Credentials.SessionToken)"
+    }
     #Set-AWSCredential -AccessKey $AssumedRole.Credentials.AccessKeyId -SecretKey $AssumedRole.Credentials.SecretAccessKey -SessionToken $AssumedRole.Credentials.SessionToken
     #$Global:StoredAWSCredentials = $StoredAWSCredentials
 }
