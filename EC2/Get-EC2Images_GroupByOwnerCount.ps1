@@ -16,7 +16,7 @@ $CommonOwners = @('099720109477','137112412989')
 get-date
 $amilist = @()
     Get-AWSRegion|%{
-    $amilist += Get-EC2Image -Region $_.Region| where {$_.ownerid -notmatch $CommonOwners}
+    $amilist += Get-EC2Image -Region $_.Region| where {$filter}
     }
     get-date
        <#PS $amilist.count
