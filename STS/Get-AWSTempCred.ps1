@@ -80,12 +80,13 @@ Function Get-STSSAMLCred {
         
         #Evaluate SAML Response
         $SAMLResponseDecoded=[xml]([System.Text.Encoding]::utf8.GetString([System.Convert]::FromBase64String($SAMLResponseEncoded))) | select -ExpandProperty response
-        
-        $AvailableAWSAccts = $SAMLResponseDecoded.Assertion.AttributeStatement.Attribute |?{$_.name -eq 'https://ConfigAbbrev.bch'}  | %{
+        #removing this portion temporarily because the configabbrev doesnt look to be a standard response.  This portion should pull the account name into the get-choice function
+        #once i figure out what the standard is, i can add it to the parameter list and set a standard.
+       <# $AvailableAWSAccts = $SAMLResponseDecoded.Assertion.AttributeStatement.Attribute |?{$_.name -eq 'https://ConfigAbbrev.bch'}  | %{
                     $_.AttributeValue |%{
                 [PSCustomObject]@{"Accts" = (($_ -replace "\|", "`t ") -split "`t")[0,2] -join ""}
             }
-        }
+        }#>
     
         $AvailableRoles = $SAMLResponseDecoded.Assertion.AttributeStatement.Attribute |?{$_.name -eq 'https://aws.amazon.com/SAML/Attributes/Role'}  | %{
             <#$AvailableRoles = $SAMLResponseDecoded.Assertion.AttributeStatement.Attribute |?{$_.name -eq 'https://ConfigAbbrev.bch'}  | %{
@@ -104,7 +105,7 @@ Function Get-STSSAMLCred {
         
         If ($AvailableRoles.count -gt 1) {
             
-                    $AccountsandRoles = @()
+                  <#  $AccountsandRoles = @()
                 $I = 0
                 do {
                     $obj = new-object psobject
@@ -115,9 +116,10 @@ Function Get-STSSAMLCred {
                     $i++
                 }
                 while ($I -lt $AvailableRoles.count)#Choose role logic
-            $ChosenRole= $AccountsandRoles | Get-Choice -Message "Choose which role to assume" -Property 'AccountName'
+                #>
+            $ChosenRole= $AvailableRoles | Get-Choice -Message "Choose which role to assume" -Property 'Role'
         } else {
-            $ChosenRole=$AccountsandRoles[0]
+            $ChosenRole=$AvailableRoles[0]
         }
         
         #Send token to AWS STS
