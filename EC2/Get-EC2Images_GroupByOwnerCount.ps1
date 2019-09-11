@@ -4,7 +4,7 @@
 Function Get-EC2Images_GroupByOwnerCount{
 
 param (
-    [Parameter(Mandatory=$true)][int]$MaxImages, 
+    [Parameter(Mandatory=$true)][int]$MaxImages
 
 )
 

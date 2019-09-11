@@ -1,4 +1,5 @@
-﻿Function Get-AWSRoleUserList {
+﻿Function Get-IAMUsersInRoleAllOrgs {
+    [alias("Get-AWSRoleUserList")]
 #This function currently lists all IAM user accounts specified in an instance under the policy titled: AdministratorAccess
 param(
     [Parameter(Mandatory=$true)]$Role, #where $role is the role you want to assume to authenticate to another organization.

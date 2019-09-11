@@ -1,5 +1,5 @@
 ﻿Function Get-STSCreds {
-
+    [alias("Switch-AWSRoles")]
 param(
     [Parameter(Mandatory=$true)][string]$OrganizationID, 
     [Parameter(Mandatory=$true)][string]$Role

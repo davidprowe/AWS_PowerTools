@@ -1,4 +1,6 @@
-﻿<#
+﻿Function Get-IAMOrgOUList{
+
+<#
     .SYNOPSIS
         Displays a formatted table of AWS Organization OUs on the console
     
@@ -141,3 +143,4 @@ function Get-AllOrgOus {
     }
 }
 Get-AllOrgOus
+}
