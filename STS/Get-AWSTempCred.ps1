@@ -144,13 +144,9 @@ Function Get-STSSAMLCred {
         $Global:StoredAWSCredentials = $StoredAWSCredentials
         }
         else{
-         #Commented out printing of sensitive information:
-        #Sensitive information - i want this because I'm using this for aws-vault and cloudmapper
-        Write-host "AccessKey=$($AssumedRole.Credentials.AccessKeyId)"
-        write-host ""
-        Write-host "SecretKey=$($AssumedRole.Credentials.SecretAccessKey)"
-        write-host ""
-        Write-host "SessionToken=$($AssumedRole.Credentials.SessionToken)"
+         #Updating to pscustomobjectoutput.  This hides the end of the session token.  So to see the output of the script, you will have to store the get-stssamlcred as a variable 
+         [PSCustomObject]@{'AccessKey' = $($AssumedRole.Credentials.AccessKeyId); 'SecretKey' = $($AssumedRole.Credentials.SecretAccessKey); 'SessionToken' = $($AssumedRole.Credentials.SessionToken)}
+         
         }
         #Set-AWSCredential -AccessKey $AssumedRole.Credentials.AccessKeyId -SecretKey $AssumedRole.Credentials.SecretAccessKey -SessionToken $AssumedRole.Credentials.SessionToken
         #$Global:StoredAWSCredentials = $StoredAWSCredentials
