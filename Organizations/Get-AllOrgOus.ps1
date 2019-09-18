@@ -20,6 +20,9 @@
  
     
     .NOTES
+        Updates 9/12/2019 - DRowe - Updated output to remove format-table.  Allows script to be exported into variable with ease
+        
+    
         Alex Neihaus 2019-07-15
         (c) 2019 Air11 Technology LLC -- licensed under the Apache OpenSource 2.0 license, https://opensource.org/licenses/Apache-2.0
         Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,8 +37,11 @@
         limitations under the License.
         
         Author's blog: https://www.yobyot.com
+
+    
 #>
 [CmdletBinding()]
+
 param
 (
     [Parameter(Mandatory = $false,
@@ -46,13 +52,28 @@ param
     [Parameter(Position = 2,
         HelpMessage = 'Enter TRUE to pipe output to a file in .csv format')]
     [ValidateSet($true, $false, IgnoreCase = $true)]
-    [boolean]$CSV = $false
+    [boolean]$CSV = $false,
+    [Parameter(Mandatory = $false,
+        Position = 2,
+        HelpMessage = 'Use if you want to list accounts instead of OUs')]
+    [switch]$ListAccounts
 )
 <# This function recursively lists all OUs starting from the root and places the ARN, ID and name 
     of the OU into an array to be presented to the user as a formatted table
 #>
-function Get-OrgChildOUs ($ParentOUId, $ParentName) {
-    $childouids = Get-ORGChild -ParentId $ParentOUId -ChildType ORGANIZATIONAL_UNIT
+function Get-OrgChildOUs {
+    param(
+    [Parameter(Mandatory = $false,
+        Position = 1)]
+    [System.String]$ParentOUId,
+    [Parameter(Mandatory = $false,
+        Position = 2)]
+    [System.String]$ParentName,
+    [System.String]$ChildType = 'ORGANIZATIONAL_UNIT'
+)
+
+
+    $childouids = Get-ORGChild -ParentId $ParentOUId -ChildType $ChildType
     foreach ($childouid in $childouids.Id) {
         $obj = New-Object -TypeName PSObject -Property @{
             "Arn"    = "";
@@ -71,12 +92,14 @@ function Get-OrgChildOUs ($ParentOUId, $ParentName) {
         Start-Sleep -Seconds 2 # For some reason, AWS cmdlet Get-OrgOrganizationalUnit fails if lots of IDs are passed via pipeline, so this foreach loop slows it down
         # Using the current OU id, see if there are any child OUs and recursively call this function.
         do {
-            Get-OrgChildOUs -ParentOUId $obj.Id -ParentName $obj.Name
+                if(!$PSBoundParameters.ContainsKey('ListAccounts')){Get-OrgChildOUs -ParentOUId $obj.Id -ParentName $obj.Name}
+                else{Get-OrgChildOUs -ParentOUId $obj.Id -ParentName $obj.Name -ChildType ACCOUNT}
+            
         }
         until ($null -eq $($AWSHistory.LastServiceResponse.Children)) # $AWSHistory contains $null when there are no more child OUs
         
     }
-}
+}               
 function Get-AllOrgOus {
     Begin {
         switch ($PSVersionTable.PSEdition) {
@@ -98,16 +121,20 @@ function Get-AllOrgOus {
         # If so, Initialize-AWSDefaultConfiguration works. See https://github.com/PowerShell/vscode-powershell/issues/2050
         switch (Test-Path Variable:PSDebugContext -IsValid) {
             $true {
-             Initialize-AWSDefaultConfiguration -ProfileName $AWSStoredProfile   
+                if ($PSBoundParameters.ContainsKey('AWSStoredProfile')){Initialize-AWSDefaultConfiguration -ProfileName $AWSStoredProfile}
+                else{}
             }
             $false {
-                Set-AWSCredential -ProfileName $AWSStoredProfile -ErrorAction SilentlyContinue # Set the profile to be used
+                if ($PSBoundParameters.ContainsKey('AWSStoredProfile')){
+                    Set-AWSCredential -ProfileName $AWSStoredProfile -ErrorAction SilentlyContinue # Set the profile to be used
                 if ($null -ne $error[0]) {
                     # Profile was NOT set correctly; Set-AWSCredentals does NOT store errors in $AWSHistory variable, so check $error array varaiable
                     "Your AWS stored profile was incorrect in some way"
                     "Set-AWSCredential returned: $error[0].Exception"
                     exit
                 }
+                }
+                
             }
         }
     }
@@ -120,18 +147,23 @@ function Get-AllOrgOus {
     End {
         $objarray = @()
         foreach ($id in $Script:AllOUs.id) {
-            $obj = New-Object -TypeName PSObject -Property @{
-                "OUName" = "$($Script:AllOUs.Name[($Script:AllOUs.id).IndexOf($id)])";
+            $obj = new-object psobject
+            
+                $obj |Add-member NoteProperty Parent $($Script:AllOUs.Parent[($Script:AllOUs.id).IndexOf($id)])
+                $obj |Add-member NoteProperty OUName $($Script:AllOUs.Name[($Script:AllOUs.id).IndexOf($id)])
+                $obj |Add-member NoteProperty OUId $($Script:AllOUs.Id[($Script:AllOUs.id).IndexOf($id)]) 
+                $obj |Add-member NoteProperty Arn $($Script:AllOUs.Arn[($Script:AllOUs.id).IndexOf($id)])
+                <#"OUName" = "$($Script:AllOUs.Name[($Script:AllOUs.id).IndexOf($id)])";
                 "OUId"   = "$($Script:AllOUs.Id[($Script:AllOUs.id).IndexOf($id)])";
                 "Parent" = "$($Script:AllOUs.Parent[($Script:AllOUs.id).IndexOf($id)])";
-                "Arn"    = "$($Script:AllOUs.Arn[($Script:AllOUs.id).IndexOf($id)])";
-            }
+                "Arn"    = "$($Script:AllOUs.Arn[($Script:AllOUs.id).IndexOf($id)])";#>
+            
             $objarray += $obj
         }
         switch ($CSV) {
             $false {
                 Write-Host -ForegroundColor Yellow "Displaying all OUs in this AWS Organization"
-                $objarray | Sort-Object -Property "OUName" | Format-Table Parent, OUName, OUId, Arn -AutoSize
+                $objarray | Sort-Object -Property "OUName" #| Format-Table Parent, OUName, OUId, Arn -AutoSize
             }
             $true {
                 $csvfile = "$HOME/AWSOUs-$(Get-Date -Format "yyyy-mm-dd-THH-MM-ss").csv"

@@ -10,6 +10,7 @@ param (
 
 $mfadevices = @()
 $MFAreadable = @()
+$MFAListAll = @()
 foreach ($org in $userlist){
     $orgid = $null
     $polgroupmembers = $null
@@ -18,8 +19,7 @@ foreach ($org in $userlist){
     $polgroupmembers = $org.polgroupmembers
     $policyusers = $org.policyusers
     
-    if(($polgroupmembers.count -gt 0) -or ($policyusers.count -gt 0)){
-               
+                  
         $account = $orgid
         #$RoleArn = "arn:aws:iam::${Account}:role/$role"
         if ((Get-STSCallerIdentity).account -ne $orgid){
@@ -27,14 +27,11 @@ foreach ($org in $userlist){
         $Credentials = Switch-AWSRoles -OrganizationID $orgid -Role $role
         #New-AWSCredentials -AccessKey $Response.AccessKeyId -SecretKey $Response.SecretAccessKey -SessionToken $Response.SessionToken
         $mfadevices += Get-IAMVirtualMFADevice -Credential $Credentials
-        }
-        else{
+        } else {
         $mfadevices += Get-IAMVirtualMFADevice
         }
-        
-    }
-    
-
+            
+        #
     foreach ($device in $mfadevices){
         $obj = new-object psobject
         $obj |Add-member NoteProperty SerialNumber $device.serialnumber
@@ -44,8 +41,8 @@ foreach ($org in $userlist){
         $MFAreadable += $obj
     }
 
-    $MFAListAll = @()
-    foreach ($org in $UserList){
+    
+    
     #check for root in mfareadable
         $obj = new-object psobject
         $obj |Add-member NoteProperty OrganizationID $org.OrganizationID
@@ -54,8 +51,8 @@ foreach ($org in $userlist){
         $orgID = $org.OrganizationID
         $rootarn = "arn:aws:iam::${orgid}:root"
         $rootmfaexists = $null
-        $rootmfaexists = ($MFAreadable.userarn -eq $rootarn)
-            if ($rootmfaexists){
+        $rootmfaexists = ($mfadevices.user.arn -contains $rootarn) 
+            if ($rootmfaexists -eq $true){
             #this if shows that an mfa device is created for the root account
             $obj |Add-member NoteProperty MFAEnabled "YES"
                 }
@@ -116,7 +113,7 @@ foreach ($org in $userlist){
         }
             }
 
-    }
+    
     #now i have all the mfa devices in an entire org, split the $mfadevices into an object that is org id/ user
     
     $MFALISTALL |Sort-Object -Property organizationid,username -Unique
