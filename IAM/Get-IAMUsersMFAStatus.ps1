@@ -1,6 +1,6 @@
 ﻿
 
-function Get-AWSIAMUsersNoMFADevice {
+function Get-IAMUsersMFAStatus {
 #used in conjunction with list all admins output
 param (
     [parameter(Mandatory=$true)][object]$UserList,
