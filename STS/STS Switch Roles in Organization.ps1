@@ -43,10 +43,13 @@ Function Switch-AccessWithAWSKey {
 param (
     [Parameter(Mandatory=$true)][string]$AccessKey, 
     [Parameter(Mandatory=$true)][string]$SecretKey,
+    [string]$SessionToken,
     [string]$Profile = 'tempprofile'
     )
-     
-    Set-AWSCredential -AccessKey $AccessKey -SecretKey $SecretKey -StoreAs $Profile
+    if ($PSBoundParameters.ContainsKey('SessionToken')){
+        Set-AWSCredential -AccessKey $AccessKey -SecretKey $SecretKey -StoreAs $Profile -SessionToken $SessionToken
+    }
+    else{Set-AWSCredential -AccessKey $AccessKey -SecretKey $SecretKey -StoreAs $Profile}
     Set-AWSCredential -ProfileName $Profile
 }
         
