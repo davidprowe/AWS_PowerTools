@@ -78,8 +78,9 @@ $OrgList | %{
                         $obj |Add-member NoteProperty PolicySummary $pol.PolicySummary
                         
                         $objarray += $obj
+                        Start-Sleep .6
                     }
-                    Start-Sleep 1.5
+                    
                     
                     }
                     
