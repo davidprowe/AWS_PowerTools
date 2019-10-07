@@ -140,7 +140,9 @@ Function Get-STSSAMLCred {
     
         if ($SetHost){
         Write-Host "Setting as default AWSCredential for future AWSPowershell usage, by exporting to `$Global:StoredAWSCredentials"
-        Set-AWSCredential -AccessKey $AssumedRole.Credentials.AccessKeyId -SecretKey $AssumedRole.Credentials.SecretAccessKey -SessionToken $AssumedRole.Credentials.SessionToken
+        Set-AWSCredential -AccessKey $AssumedRole.Credentials.AccessKeyId -SecretKey $AssumedRole.Credentials.SecretAccessKey -SessionToken $AssumedRole.Credentials.SessionToken -StoreAs SAML
+        Set-AWSCredential -ProfileName SAML
+        #todo, make the $assumedrole export to the .aws credentials file and overwrite the default
         $Global:StoredAWSCredentials = $StoredAWSCredentials
         }
         else{

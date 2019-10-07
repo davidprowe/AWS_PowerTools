@@ -41,7 +41,7 @@ param
                     
                                     $obj |Add-member NoteProperty OrganizationID $org.id
                                     $obj |Add-member NoteProperty OrganizationName $org.Name
-                                    $obj |Add-member NoteProperty EC2InstanceID $_.instances.instanceid
+                                    $obj |Add-member NoteProperty InstanceID $_.instances.instanceid
                                     $obj |Add-member NoteProperty InstanceType $_.instances.InstanceType
                                     $obj |Add-member NoteProperty Region $region.Region
                                     if($status){
@@ -83,7 +83,7 @@ param
                 
                                 $obj |Add-member NoteProperty OrganizationID $org.id
                                 $obj |Add-member NoteProperty OrganizationName $org.Name
-                                $obj |Add-member NoteProperty EC2InstanceID $_.instances.instanceid
+                                $obj |Add-member NoteProperty InstanceID $_.instances.instanceid
                                 $obj |Add-member NoteProperty InstanceType $_.instances.InstanceType
                                 $obj |Add-member NoteProperty Region $region.Region
                                 if($status){
@@ -125,8 +125,8 @@ param
                         $obj = new-object psobject
         
                         $obj |Add-member NoteProperty OrganizationID $org.id
-                        $obj |Add-member NoteProperty OrganizationName $org.Name
-                        $obj |Add-member NoteProperty EC2InstanceID $_.instances.instanceid
+                        $obj |Add-member NoteProperty OrganizationName $oname
+                        $obj |Add-member NoteProperty InstanceID $_.instances.instanceid
                         $obj |Add-member NoteProperty InstanceType $_.instances.InstanceType
                         $obj |Add-member NoteProperty Region $region.Region
                         if($status){

@@ -3,12 +3,14 @@
 #This function currently lists all IAM user accounts specified in an instance under the policy titled: AdministratorAccess
 param(
     [Parameter(Mandatory=$true)]$Role, #where $role is the role you want to assume to authenticate to another organization.
-    [string]$PolicyName = "AdministratorAccess" 
+    [string]$PolicyName = "AdministratorAccess",
+    [switch]$AllUsers
 )
 $orgs = Get-ORGAccountList|select id, name, email
 $adminlist = @()
-
+$userlist = @()
 foreach ($org in $orgs){
+    if($AllUsers){
         $id =$org.Id
         $nm = $org.name
         #write-host "On account $id $nm"
@@ -17,6 +19,20 @@ foreach ($org in $orgs){
         $obj |Add-member NoteProperty Arn $org.arn
         $obj | Add-Member NoteProperty OrganizationName $nm
         $account = $org.id
+        $Credentials = Get-STSCreds -OrganizationID $id -Role $role
+        $userinORglist = Get-IAMUserList -Credential $Credentials
+        $obj |add-member NoteProperty IAMUsers $userinORglist
+        $userlist += $obj
+    }else{
+        $id =$org.Id
+        $nm = $org.name
+        #write-host "On account $id $nm"
+        $obj = new-object psobject
+        $obj |Add-member NoteProperty OrganizationID $id
+        $obj |Add-member NoteProperty Arn $org.arn
+        $obj | Add-Member NoteProperty OrganizationName $nm
+        $account = $org.id
+
         #$RoleArn = "arn:aws:iam::${Account}:role/$role"
   
         #Request temporary credentials for each account and create a credential object
@@ -65,7 +81,8 @@ foreach ($org in $orgs){
                 $adminlist += $obj
                 
 
-}
-
-$adminlist 
+}}
+        
+if ($AllUsers){$userlist}else{
+$adminlist }
 }

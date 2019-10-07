@@ -245,7 +245,7 @@ Function Get-OrgAccountLocation{
             $obj |Add-member NoteProperty OUName $o.OUName
             $obj |Add-member NoteProperty OUID $o.OUID
             $obj |Add-member Noteproperty OUArn $o.arn
-            $obj |Add-member NoteProperty ID $acct.Id
+            $obj |Add-member NoteProperty AccountID $acct.Id
             $obj |Add-member NoteProperty AccountName $acct.name
             $obj |Add-member NoteProperty AccountArn $acct.arn
             $obj |Add-member NoteProperty AccountStatus $acct.status
