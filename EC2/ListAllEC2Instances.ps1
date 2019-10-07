@@ -55,7 +55,7 @@ param
                                         $obj |Add-member NoteProperty Reachability "NoStateFound"
                                         $obj |Add-member NoteProperty InstanceStatus "NoStateFound"
                                     }
-                                    $obj |Add-member NoteProperty KeyPem $_.instances
+                                    $obj |Add-member NoteProperty Instances $_.instances
                                     $ec2Array += $obj
     
                                 }
@@ -113,6 +113,7 @@ param
 
             $regions | % {
                 $oname = Get-IAMAccountAlias
+                $acctid = (Get-STSCallerIdentity).account
                 if (!$oname){$oname = 'NoAccountAlias'}
                 $region = $_
                 $rname = $_.name
@@ -124,7 +125,7 @@ param
                         $Pemkey = $_ |select instances
                         $obj = new-object psobject
         
-                        $obj |Add-member NoteProperty OrganizationID $org.id
+                        $obj |Add-member NoteProperty OrganizationID $acctid
                         $obj |Add-member NoteProperty OrganizationName $oname
                         $obj |Add-member NoteProperty InstanceID $_.instances.instanceid
                         $obj |Add-member NoteProperty InstanceType $_.instances.InstanceType
