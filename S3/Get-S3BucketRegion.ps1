@@ -29,7 +29,7 @@ $objarray = @()
             $S3|%{
                 
                 $bname = $_
-                Clear-Variable -Name Region
+                
                 $Regions | %{
                     if (!$region) {
                         $r = $_
@@ -42,8 +42,9 @@ $objarray = @()
                             
                             try{
                                 if ($credential){get-s3publicaccessblock -BucketName $_.bucketname -credential $creds -Region $_.Region}else{
-                                    $publicaccess = get-s3publicaccessblock -BucketName $_.bucketname -Region $_.Region}catch{}
+                                    $publicaccess = get-s3publicaccessblock -BucketName $_.bucketname -Region $_.Region
                                 }
+                                }catch{}
                                 
                             $region = $r
                             $obj = new-object psobject
@@ -92,7 +93,7 @@ Function Get-S3BucketRegionOrgs {
         Write-Progress -Activity "Searching Through Accounts in Organization" -id 1 -Status "$orgProgress complete of $orgcount" -PercentComplete ($orgProgress/$orgcount*100)
         if ($_.id -ne $callerID){
             $creds = get-stscreds -organizationid $_.id -role $role
-            $s3 = get-s3bucketregion -Credentials $creds}else{
+            $s3 = get-s3bucketregion -Credential $creds}else{
                 $s3 = get-s3bucketregion
             }
             $s3count = $s3.count
