@@ -18,15 +18,22 @@ Function Update-IAMAccountPasswordPolicyOrgs{
     )
     
     # set password policy from a list of orgs
-    if (!$Role){if (!$OrganizationList){try{$organizationlist = Get-ORGAccountList}catch{}}
-    if (!$OrganizationList){
+    if (!$OrganizationList){try{$organizationlist = Get-ORGAccountList}catch{}}
+    if (!$Role){
         $a = (get-stscalleridentity).account
-        Write-host "No org account members listed. setting PWD Policy only on account $a"
+        Write-host "No Role Specified. Setting PWD Policy only on account $a"
         Update-IAMAccountPasswordPolicy -AllowUsersToChangePassword $AllowUsersToChangePassword -MaxPasswordAge $MaxPasswordAge -MinimumPasswordLength $MinimumPasswordLength -PasswordReusePrevention $PasswordReusePrevention -RequireLowercaseCharacter $RequireLowercaseCharacters -RequireNumber $RequireNumbers -RequireSymbol $RequireSymbols -RequireUppercaseCharacters $RequireUppercaseCharacters -hardexpiry $false 
         Get-IAMAccountPasswordPolicy
         break
-    }}
-    
+    }
+    if (!$OrganizationList){
+        $a = (get-stscalleridentity).account
+        Write-host "No Organization Account List Found. Setting PWD Policy only on account $a"
+        Update-IAMAccountPasswordPolicy -AllowUsersToChangePassword $AllowUsersToChangePassword -MaxPasswordAge $MaxPasswordAge -MinimumPasswordLength $MinimumPasswordLength -PasswordReusePrevention $PasswordReusePrevention -RequireLowercaseCharacter $RequireLowercaseCharacters -RequireNumber $RequireNumbers -RequireSymbol $RequireSymbols -RequireUppercaseCharacters $RequireUppercaseCharacters -hardexpiry $false 
+        Get-IAMAccountPasswordPolicy
+        break
+    }
+
     foreach($org in $organizationlist){
         $credential = get-stscreds -OrganizationID $org.id -Role $Role
         $name = $org.name
