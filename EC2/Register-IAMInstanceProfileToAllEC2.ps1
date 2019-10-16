@@ -1,4 +1,3 @@
-#REFERENCE https://gist.github.com/lantrix/6d4935c934230df4a0d0348417128a48
 Function Register-EC2IamInstanceProfileAll {
     [CmdletBinding()]
 

@@ -55,8 +55,7 @@ foreach ($org in $userlist){
             if ($rootmfaexists -eq $true){
             #this if shows that an mfa device is created for the root account
             $obj |Add-member NoteProperty MFAEnabled "YES"
-                }
-            else {
+                }else {
             #this else shows there is no MFA device created for the root accoutn
             $obj |Add-member NoteProperty MFAEnabled "NO"
                 }

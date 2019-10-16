@@ -40,9 +40,16 @@ Function Get-EC2VpcOrgs {
                         $obj |Add-member NoteProperty VPC $VPCs
                         $obj |Add-member NoteProperty CidrBlock $_.CidrBlock
                         $obj |Add-member NoteProperty IsDefault $_.IsDefault
+                        if($_.tags.key -contains 'Name'){
+                            $n = ($_.tags|where-object {$_.key -eq 'Name'}).value
+                        }else{
+                            $n = 'NoTagName'
+                        }
+                        $obj |Add-member NoteProperty Name $n
                         $obj |Add-member NoteProperty OwnerID $_.OwnerId
                         $obj |Add-member NoteProperty VPCID $_.VpcId
                         $obj |Add-member NoteProperty State $_.State
+                    
                         $VPCArray += $obj
                     }
                     }
